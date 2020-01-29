@@ -2,7 +2,6 @@
 
 import sys
 
-
 class CPU:
     """Main CPU class."""
 
@@ -23,17 +22,26 @@ class CPU:
 
         address = 0
 
+        program = []
+        filename = sys.argv[1]
+        with open(filename) as f:
+            for line in f:
+                if len(line) > 0:
+                    binary_string = line.split(" #")[0]
+                    integer_value = int(binary_string, 2)
+                    program.append(integer_value)
+
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010,  # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111,  # PRN R0
-            0b00000000,
-            0b00000001,  # HLT
-        ]
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010,  # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111,  # PRN R0
+        #     0b00000000,
+        #     0b00000001,  # HLT
+        # ]
 
         for instruction in program:
             self.ram[address] = instruction
@@ -45,6 +53,8 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         # elif op == "SUB": etc
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -73,6 +83,7 @@ class CPU:
 
         ldi = 0b10000010
         prn = 0b01000111
+        mul = 0b10100010
         hlt = 0b00000001
 
         while True:
@@ -86,6 +97,9 @@ class CPU:
             elif ir == prn:
                 print(self.reg[operand_a])
                 self.pc += 2
+            elif ir == mul:
+                self.alu("MUL", operand_a, operand_b)
+                self.pc += 3
             elif ir == hlt:
                 break
             else:
